@@ -197,23 +197,23 @@ Mighty `graphql-zeus` powered form with validation field generation.
 import React from 'react';
 import { PaymentType, ValueTypes } from './graphql-zeus';
 import { ZeusForm } from 'graphql-react-admin';
-const Form = ZeusForm<ValueTypes>({ schema });
-const AddOrderForm = Form('AdminMutation', 'addOrder');
+const Form = ZeusForm<ValueTypes>({ url: 'https://faker.graphqleditor.com/a-team/potus/graphql' });
+const AddOrderForm = Form('AdminMutation', 'createOrder');
 
 export const ZeusApp = () => {
     return (
         <div style={{ padding: 60 }}>
             <AddOrderForm
                 formData={{
-                    order: {
-                        payment: PaymentType.CARD_ON_DELIVERY,
-                        total: 12300,
-                        restaurant: 'italia',
-                        address: { street: 'aaa', unit: 'aa' },
+                    createOrder: {
+                        refId: Math.floor(10000 * Math.random()) + '',
+                        loadAddressKey: { addressKey: '123' },
+                        plannedEndDate: new Date().toISOString(),
+                        unloadAddressKey: { addressKey: '123' },
                     },
                 }}
                 onSubmit={(e) => {
-                    e.formData.order.payment;
+                    console.log(e);
                 }}
             />
         </div>
