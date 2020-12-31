@@ -1,8 +1,9 @@
 import { FormQL } from '../../FormQL';
 import React from 'react';
 import { withTheme } from '@rjsf/core';
+import { Theme } from '@rjsf/material-ui';
 
-const Form = withTheme({});
+const Form = withTheme(Theme);
 
 export const App = () => {
     return (
