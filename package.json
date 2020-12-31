@@ -1,0 +1,76 @@
+{
+    "name": "graphql-react-admin",
+    "version": "0.0.0",
+    "private": false,
+    "description": "GraphQL Automatic admin panel from GraphQL schema",
+    "main": "lib/index.js",
+    "scripts": {
+        "test": "jest",
+        "test:watch": "jest --watch",
+        "start": "snowpack dev --polyfill-node",
+        "build:sandbox": "snowpack build --polyfill-node",
+        "build": "tsc --build tsconfig.build.json",
+        "lint": "eslint '*/**/*.{js,ts,tsx}' --quiet --fix"
+    },
+    "keywords": [
+        "graphql",
+        "backend",
+        "react",
+        "admin"
+    ],
+    "husky": {
+        "hooks": {
+            "pre-commit": "lint-staged"
+        }
+    },
+    "lint-staged": {
+        "*.{js,ts,tsx}": [
+            "eslint --fix"
+        ]
+    },
+    "author": "Artur Czemiel",
+    "license": "MIT",
+    "devDependencies": {
+        "@ant-design/icons": "^4.3.0",
+        "@fluentui/react": "^7.155.3",
+        "@material-ui/core": "^4.11.2",
+        "@material-ui/icons": "^4.11.2",
+        "@rjsf/antd": "^2.4.1",
+        "@rjsf/core": "^2.4.1",
+        "@rjsf/fluent-ui": "^2.4.1",
+        "@rjsf/material-ui": "^2.4.1",
+        "@snowpack/plugin-babel": "^2.1.5",
+        "@snowpack/plugin-typescript": "^1.1.1",
+        "@testing-library/jest-dom": "^5.11.6",
+        "@testing-library/react": "^11.2.2",
+        "@types/jest": "^26.0.19",
+        "@types/react": "^17.0.0",
+        "@types/react-dom": "^17.0.0",
+        "@typescript-eslint/eslint-plugin": "^4.11.0",
+        "@typescript-eslint/parser": "^4.11.0",
+        "antd": "^4.9.4",
+        "dayjs": "^1.9.8",
+        "eslint": "^7.16.0",
+        "eslint-config-prettier": "^7.1.0",
+        "eslint-plugin-prettier": "^3.3.0",
+        "eslint-plugin-react": "^7.21.5",
+        "jest": "^26.6.3",
+        "json-schema": "^0.2.5",
+        "prettier": "^2.2.1",
+        "react": "^17.0.1",
+        "react-dom": "^17.0.1",
+        "snowpack": "^3.0.0-rc.2",
+        "ts-jest": "^26.4.4",
+        "ttypescript": "^1.5.12",
+        "typescript": "^4.1.3",
+        "typescript-transform-paths": "^2.1.0"
+    },
+    "peerDependencies": {
+        "react": "^17.0.1",
+        "react-dom": "^17.0.1",
+        "@rjsf/core": "^2.4.1"
+    },
+    "dependencies": {
+        "graphql-zeus": "^3.0.0-13"
+    }
+}

@@ -1,0 +1,16 @@
+.vscode
+.DS_STORE
+.docz
+.tscache
+node_modules
+.module-cache
+*.log*
+build
+dist
+src
+deploy.sh
+deploy-toolkit.yaml
+.idea
+__test__
+__mock__
+.python-version
