@@ -5,13 +5,29 @@ import Form, { FormProps } from '@rjsf/core';
 
 //TODO handle enums and custom scalars
 
+type OverrideForm = Record<string, Record<string, JSONSchema7>>;
+
 interface FieldFormProps extends Omit<FormProps<unknown>, 'schema'> {
     field: ParserField;
     tree: ParserTree;
+    override?: OverrideForm;
     FormComponent?: React.ComponentClass<FormProps<unknown>, unknown> | React.FC<FormProps<unknown>>;
 }
 
-const convertType = (f: ParserField, tree: ParserTree): JSONSchema7 => {
+type ConvertField = {
+    f: ParserField;
+    tree: ParserTree;
+    parent?: ParserField;
+    override?: OverrideForm;
+};
+
+const convertType = ({ f, tree, parent, override }: ConvertField): JSONSchema7 => {
+    if (override && parent) {
+        const fieldOverride = override[parent.name]?.[f.name];
+        if (fieldOverride) {
+            return fieldOverride;
+        }
+    }
     if (f.data.type === ValueDefinition.InputValueDefinition) {
         if (f.type.name === ScalarTypes.Boolean) {
             return { type: 'boolean' };
@@ -29,6 +45,11 @@ const convertType = (f: ParserField, tree: ParserTree): JSONSchema7 => {
             return { type: 'string' };
         }
         const lookForField = tree.nodes.find((r) => r.name === f.type.name);
+        if (lookForField?.data.type === TypeDefinition.ScalarTypeDefinition) {
+            return {
+                type: 'string',
+            };
+        }
         if (lookForField?.data.type === TypeDefinition.EnumTypeDefinition) {
             return {
                 type: 'string',
@@ -39,7 +60,7 @@ const convertType = (f: ParserField, tree: ParserTree): JSONSchema7 => {
             type: 'object',
             required: lookForField?.args?.filter((a) => a.type.options?.includes(Options.required)).map((n) => n.name),
             properties: lookForField?.args?.reduce((a, b) => {
-                a[b.name] = convertField(b, tree);
+                a[b.name] = convertField({ f: b, tree, override, parent: lookForField });
                 return a;
             }, {} as Required<JSONSchema7>['properties']),
         };
@@ -49,29 +70,28 @@ const convertType = (f: ParserField, tree: ParserTree): JSONSchema7 => {
         type: 'object',
         required: f?.args?.filter((a) => a.type.options?.includes(Options.required)).map((n) => n.name),
         properties: f.args?.reduce((a, b) => {
-            a[b.name] = convertField(b, tree);
+            a[b.name] = convertField({ f: b, tree, override });
             return a;
         }, {} as Required<JSONSchema7>['properties']),
     };
 };
-const convertField = (f: ParserField, tree: ParserTree): JSONSchema7 => {
-    if (f.type.options?.includes(Options.array)) {
+const convertField = (props: ConvertField): JSONSchema7 => {
+    if (props.f.type.options?.includes(Options.array)) {
         return {
             type: 'array',
-            items: convertType(f, tree),
+            items: convertType(props),
         };
     }
-    return convertType(f, tree);
+    return convertType(props);
 };
 
-export const FieldForm: React.FC<FieldFormProps> = ({ field, tree, FormComponent = Form, ...formProps }) => {
+export const FieldForm: React.FC<FieldFormProps> = ({ field, override, tree, FormComponent = Form, ...formProps }) => {
     const [currentSchema, setCurrentSchema] = useState<JSONSchema7>();
     useEffect(() => {
-        setCurrentSchema(convertField(field, tree));
+        setCurrentSchema(convertField({ f: field, tree, override }));
     }, [field]);
     if (!currentSchema) {
         return <div>Loading...</div>;
     }
-    console.log(currentSchema);
     return <FormComponent {...formProps} schema={currentSchema} />;
 };

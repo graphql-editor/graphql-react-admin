@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FieldForm } from './FieldForm';
 import Form, { ISubmitEvent } from '@rjsf/core';
 import { Parser, ParserTree, Utils } from 'graphql-zeus';
+import { JSONSchema7 } from 'json-schema';
 
 type ZeusFormProps = { schema: string } | { url: string; header?: string | string[] };
 
@@ -10,9 +11,15 @@ export function ZeusForm<Y>(graphql: ZeusFormProps, FormComponent?: typeof Form)
         return function ReactComponent({
             onSubmit,
             formData,
+            override,
         }: {
             formData?: Required<Y[T]>[Z] extends [infer Payload, unknown] ? Partial<Payload> : never;
             onSubmit: Required<Y[T]>[Z] extends [infer Payload, unknown] ? (e: ISubmitEvent<Payload>) => void : never;
+            override?: {
+                [P in keyof Partial<Y>]: {
+                    [R in keyof Partial<Y[P]>]: JSONSchema7;
+                };
+            };
         }) {
             const [tree, setTree] = useState<ParserTree>();
             useEffect(() => {
@@ -39,6 +46,7 @@ export function ZeusForm<Y>(graphql: ZeusFormProps, FormComponent?: typeof Form)
             }
             return (
                 <FieldForm
+                    override={override}
                     FormComponent={FormComponent}
                     formData={formData}
                     onSubmit={onSubmit}
