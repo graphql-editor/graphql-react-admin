@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { FieldForm } from './FieldForm';
-import Form, { ISubmitEvent } from '@rjsf/core';
+import { FormProps, ISubmitEvent } from '@rjsf/core';
 import { Parser, ParserTree, Utils } from 'graphql-zeus';
 import { JSONSchema7 } from 'json-schema';
 
 type ZeusFormProps = { schema: string } | { url: string; header?: string | string[] };
 
-export function ZeusForm<Y>(graphql: ZeusFormProps, FormComponent?: typeof Form) {
+export function ZeusForm<Y>(
+    graphql: ZeusFormProps,
+    FormComponent?: React.ComponentClass<FormProps<unknown>, unknown> | React.FC<FormProps<unknown>>,
+) {
     return function Form<T extends keyof Y, Z extends keyof Y[T]>(type: T, field: Z) {
         return function ReactComponent({
             onSubmit,
