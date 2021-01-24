@@ -2,32 +2,25 @@ import { Options, ParserField, ParserTree, ScalarTypes, TypeDefinition, ValueDef
 import React, { useEffect, useState } from 'react';
 import { JSONSchema7 } from 'json-schema';
 import Form, { FormProps } from '@rjsf/core';
+import { JSONSchemaOverrideProperties, OverrideFormSchema, UniversalFormOverride } from './models';
 
 //TODO handle enums and custom scalars
 
-type OverrideForm = Record<string, Record<string, JSONSchema7>>;
-
-interface FieldFormProps extends Omit<FormProps<unknown>, 'schema'> {
+interface FieldFormProps extends Omit<FormProps<any>, 'schema'> {
     field: ParserField;
     tree: ParserTree;
-    override?: OverrideForm;
-    FormComponent?: React.ComponentClass<FormProps<unknown>, unknown> | React.FC<FormProps<unknown>>;
+    override?: OverrideFormSchema;
+    FormComponent?: UniversalFormOverride;
 }
 
 type ConvertField = {
     f: ParserField;
     tree: ParserTree;
     parent?: ParserField;
-    override?: OverrideForm;
+    override?: OverrideFormSchema;
 };
 
-const convertType = ({ f, tree, parent, override }: ConvertField): JSONSchema7 => {
-    if (override && parent) {
-        const fieldOverride = override[parent.name]?.[f.name];
-        if (fieldOverride) {
-            return fieldOverride;
-        }
-    }
+const getDataType = ({ f, tree, override }: ConvertField): JSONSchema7 => {
     if (f.data.type === ValueDefinition.InputValueDefinition) {
         if (f.type.name === ScalarTypes.Boolean) {
             return { type: 'boolean' };
@@ -75,6 +68,18 @@ const convertType = ({ f, tree, parent, override }: ConvertField): JSONSchema7 =
         }, {} as Required<JSONSchema7>['properties']),
     };
 };
+
+const convertType = (props: ConvertField): JSONSchema7 => {
+    const { override, parent, f } = props;
+    const type = getDataType(props);
+    if (override && parent) {
+        const fieldOverride = override[parent.name]?.[f.name];
+        if (fieldOverride) {
+            return fieldOverride(type as JSONSchemaOverrideProperties<any>);
+        }
+    }
+    return type;
+};
 const convertField = (props: ConvertField): JSONSchema7 => {
     if (props.f.type.options?.includes(Options.array)) {
         return {
@@ -85,7 +90,8 @@ const convertField = (props: ConvertField): JSONSchema7 => {
     return convertType(props);
 };
 
-export const FieldForm: React.FC<FieldFormProps> = ({ field, override, tree, FormComponent = Form, ...formProps }) => {
+export function FieldForm(props: FieldFormProps) {
+    const { field, override, tree, FormComponent, ...formProps } = props;
     const [currentSchema, setCurrentSchema] = useState<JSONSchema7>();
     useEffect(() => {
         setCurrentSchema(convertField({ f: field, tree, override }));
@@ -93,5 +99,8 @@ export const FieldForm: React.FC<FieldFormProps> = ({ field, override, tree, For
     if (!currentSchema) {
         return <div>Loading...</div>;
     }
-    return <FormComponent {...formProps} schema={currentSchema} />;
-};
+    if (FormComponent) {
+        return FormComponent({ ...props, schema: currentSchema });
+    }
+    return <Form {...formProps} schema={currentSchema} />;
+}

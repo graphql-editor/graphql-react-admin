@@ -2,11 +2,11 @@ import { Parser, ParserField, ParserTree, TypeDefinition, Utils } from 'graphql-
 import React, { useEffect, useState } from 'react';
 import { FieldForm } from './FieldForm';
 import { SelectArg } from './SelectArg';
-import { FormProps } from '@rjsf/core';
+import { UniversalFormOverride } from './models';
 
 interface FormQLProps {
     graphql: { schema: string } | { url: string; header?: string | string[] };
-    FormComponent?: React.ComponentClass<FormProps<unknown>, unknown> | React.FC<FormProps<unknown>>;
+    FormComponent?: UniversalFormOverride<unknown>;
 }
 export const FormQL: React.FC<FormQLProps> = ({ graphql, FormComponent }) => {
     const [rootTypes, setRootTypes] = useState<ParserField[]>();

@@ -1,28 +1,22 @@
 import React, { useEffect, useState } from 'react';
 import { FieldForm } from './FieldForm';
-import { FormProps, ISubmitEvent } from '@rjsf/core';
+import { ISubmitEvent } from '@rjsf/core';
 import { Parser, ParserTree, Utils } from 'graphql-zeus';
-import { JSONSchema7 } from 'json-schema';
+import { OverrideFormSchema, UniversalFormOverride } from './models';
 
 type ZeusFormProps = { schema: string } | { url: string; header?: string | string[] };
 
-export function ZeusForm<Y>(
-    graphql: ZeusFormProps,
-    FormComponent?: React.ComponentClass<FormProps<unknown>, unknown> | React.FC<FormProps<unknown>>,
-) {
-    return function Form<T extends keyof Y, Z extends keyof Y[T]>(type: T, field: Z) {
+export function ZeusForm<Y>(graphql: ZeusFormProps, FormComponent?: UniversalFormOverride) {
+    return function Form<T extends keyof Y, Z extends keyof Y[T]>(type: T, field?: Z) {
+        type FormDataType = Required<Y[T]>[Z] extends [infer Payload, unknown] ? Payload : Required<Y>[T];
         return function ReactComponent({
             onSubmit,
             formData,
             override,
         }: {
-            formData?: Required<Y[T]>[Z] extends [infer Payload, unknown] ? Partial<Payload> : never;
-            onSubmit: Required<Y[T]>[Z] extends [infer Payload, unknown] ? (e: ISubmitEvent<Payload>) => void : never;
-            override?: {
-                [P in keyof Partial<Y>]: {
-                    [R in keyof Partial<Y[P]>]: JSONSchema7;
-                };
-            };
+            formData?: FormDataType;
+            onSubmit: (e: ISubmitEvent<FormDataType>) => void;
+            override?: OverrideFormSchema<Y>;
         }) {
             const [tree, setTree] = useState<ParserTree>();
             useEffect(() => {
@@ -39,13 +33,15 @@ export function ZeusForm<Y>(
             if (!tree) {
                 return <></>;
             }
-            const typeNode = tree.nodes.find((tn) => tn.name === type);
+            let typeNode = tree.nodes.find((tn) => tn.name === type);
             if (!typeNode) {
                 throw new Error('Internal library error. Please check type');
             }
-            const fieldNode = typeNode.args?.find((a) => a.name === field);
-            if (!fieldNode) {
-                throw new Error('Internal library error. Please check field');
+            if (field) {
+                typeNode = typeNode.args?.find((a) => a.name === field);
+                if (!typeNode) {
+                    throw new Error('Internal library error. Please check field');
+                }
             }
             return (
                 <FieldForm
@@ -53,7 +49,7 @@ export function ZeusForm<Y>(
                     FormComponent={FormComponent}
                     formData={formData}
                     onSubmit={onSubmit}
-                    field={fieldNode}
+                    field={typeNode}
                     tree={tree}
                 />
             );

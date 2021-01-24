@@ -4,16 +4,22 @@ import { ZeusForm } from '../../ZeusForm';
 
 const Form = ZeusForm<ValueTypes>({ url: 'https://faker.graphqleditor.com/a-team/potus/graphql' });
 const AddOrderForm = Form('AdminMutation', 'createOrder');
-
+const CreateDriverForm = Form('CreateDriver');
 export const ZeusApp = () => {
     return (
         <div style={{ padding: 60 }}>
             <AddOrderForm
                 override={{
+                    AdminMutation: {
+                        createOrder: (schema) => {
+                            return schema;
+                        },
+                    },
                     CreateOrder: {
-                        plannedEndDate: {
-                            type: 'string',
-                            format: 'date-time',
+                        plannedEndDate: (schema) => {
+                            return {
+                                ...schema,
+                            };
                         },
                     },
                 }}
@@ -29,6 +35,7 @@ export const ZeusApp = () => {
                     console.log(e);
                 }}
             />
+            <CreateDriverForm onSubmit={(e) => console.log(e)} />
         </div>
     );
 };

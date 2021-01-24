@@ -8,7 +8,12 @@ const Form = withTheme(Theme);
 export const App = () => {
     return (
         <div>
-            <FormQL FormComponent={Form} graphql={{ url: 'https://faker.graphqleditor.com/a-team/potus/graphql' }} />
+            <FormQL
+                FormComponent={(props) => {
+                    return <Form {...props} />;
+                }}
+                graphql={{ url: 'https://faker.graphqleditor.com/a-team/potus/graphql' }}
+            />
         </div>
     );
 };
