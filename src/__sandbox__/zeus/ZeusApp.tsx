@@ -10,17 +10,8 @@ export const ZeusApp = () => {
         <div style={{ padding: 60 }}>
             <AddOrderForm
                 override={{
-                    AdminMutation: {
-                        createOrder: (schema) => {
-                            return schema;
-                        },
-                    },
                     CreateOrder: {
-                        plannedEndDate: (schema) => {
-                            return {
-                                ...schema,
-                            };
-                        },
+                        pieces: () => undefined,
                     },
                 }}
                 formData={{

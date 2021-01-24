@@ -1,6 +1,6 @@
 {
     "name": "graphql-react-admin",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "private": false,
     "description": "GraphQL Automatic admin panel from GraphQL schema",
     "main": "lib/index.js",

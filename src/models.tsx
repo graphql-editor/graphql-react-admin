@@ -17,6 +17,6 @@ export type OverrideFormSchema<Y = any> = {
     [P in keyof Y]?: {
         [R in keyof Y[P]]?: (
             generated: JSONSchemaOverrideProperties<ExtractPayLoad<Y[P][R]>>,
-        ) => JSONSchemaOverrideProperties<ExtractPayLoad<Y[P][R]>>;
+        ) => JSONSchemaOverrideProperties<ExtractPayLoad<Y[P][R]>> | undefined;
     };
 };

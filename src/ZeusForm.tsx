@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { FieldForm } from './FieldForm';
 import { ISubmitEvent } from '@rjsf/core';
-import { Parser, ParserTree, Utils } from 'graphql-zeus';
+import { Parser, ParserField, ParserTree, Utils } from 'graphql-zeus';
 import { OverrideFormSchema, UniversalFormOverride } from './models';
 
 type ZeusFormProps = { schema: string } | { url: string; header?: string | string[] };
@@ -25,7 +25,6 @@ export function ZeusForm<Y>(graphql: ZeusFormProps, FormComponent?: UniversalFor
                 }
                 if ('url' in graphql) {
                     Utils.getFromUrl(graphql.url, graphql.header).then((schema) => {
-                        console.log(schema);
                         setTree(Parser.parse(schema));
                     });
                 }
@@ -33,13 +32,14 @@ export function ZeusForm<Y>(graphql: ZeusFormProps, FormComponent?: UniversalFor
             if (!tree) {
                 return <></>;
             }
-            let typeNode = tree.nodes.find((tn) => tn.name === type);
-            if (!typeNode) {
+            const parentOrInputNode = tree.nodes.find((tn) => tn.name === type);
+            if (!parentOrInputNode) {
                 throw new Error('Internal library error. Please check type');
             }
+            let fieldNode: ParserField | undefined;
             if (field) {
-                typeNode = typeNode.args?.find((a) => a.name === field);
-                if (!typeNode) {
+                fieldNode = parentOrInputNode.args?.find((a) => a.name === field);
+                if (!fieldNode) {
                     throw new Error('Internal library error. Please check field');
                 }
             }
@@ -49,7 +49,8 @@ export function ZeusForm<Y>(graphql: ZeusFormProps, FormComponent?: UniversalFor
                     FormComponent={FormComponent}
                     formData={formData}
                     onSubmit={onSubmit}
-                    field={typeNode}
+                    parent={parentOrInputNode}
+                    field={fieldNode || parentOrInputNode}
                     tree={tree}
                 />
             );
